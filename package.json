@@ -1,0 +1,24 @@
+{
+  "name": "shiurfinder",
+  "version": "1.0.0",
+  "description": "Discover, shortlist, and follow your favorite Torah shiurim",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "server:start": "cd server && npm start",
+    "client:build": "cd client && npm run build",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/binyominzeev/shiurfinder.git"
+  },
+  "keywords": ["torah", "shiur", "learning", "react", "mongodb"],
+  "author": "binyominzeev",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
