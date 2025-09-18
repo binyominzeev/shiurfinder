@@ -156,25 +156,24 @@ const Discovery = () => {
               From your interests, select 5-10 as your top favorites. 
               Selected: {selectedFavorites.length}/10
             </p>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-green-800">
-                  Progress: {selectedFavorites.length} favorites (need 5-10)
-                </span>
-                {canCompleteStep2 && (
-                  <button 
-                    onClick={handleNextStep}
-                    disabled={saving}
-                    className="btn-primary disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Complete Setup →'}
-                  </button>
-                )}
-              </div>
+          </div>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 sticky top-0 z-20" style={{background: '#ecfdf5'}}>
+            <div className="flex justify-between items-center">
+              <span className="text-green-800">
+                Progress: {selectedFavorites.length} favorites (need 5-10)
+              </span>
+              {canCompleteStep2 && (
+                <button 
+                  onClick={handleNextStep}
+                  disabled={saving}
+                  className="btn-primary disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Complete Setup →'}
+                </button>
+              )}
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             {getFilteredShiurim().map(shiur => (
               <ShiurCard
                 key={shiur._id}

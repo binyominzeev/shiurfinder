@@ -76,11 +76,11 @@ const ShiurCard = ({ shiur, isSelected, onToggle, selectionMode = 'view', showRa
         </p>
       )}
 
-      {showRabbi && shiur.rabbi && (
+      {showRabbi && shiur.rabbi && shiur.rabbi.name && (
         <div className="flex items-center mb-3">
           <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-2">
             <span className="text-xs font-medium text-gray-600">
-              {shiur.rabbi.name.split(' ').map(n => n[0]).join('')}
+              {typeof shiur.rabbi.name === 'string' ? shiur.rabbi.name.split(' ').map(n => n[0]).join('') : ''}
             </span>
           </div>
           <span className="text-sm font-medium text-gray-900">
