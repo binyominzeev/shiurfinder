@@ -15,10 +15,20 @@
     "type": "git",
     "url": "git+https://github.com/binyominzeev/shiurfinder.git"
   },
-  "keywords": ["torah", "shiur", "learning", "react", "mongodb"],
+  "keywords": [
+    "torah",
+    "shiur",
+    "learning",
+    "react",
+    "mongodb"
+  ],
   "author": "binyominzeev",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "multer": "^2.0.2"
   }
 }

@@ -7,6 +7,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Discovery from './pages/Discovery';
 import Favorites from './pages/Favorites';
+import AdminUpload from './pages/AdminUpload';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -37,6 +38,11 @@ function App() {
               <Route path="/favorites" element={
                 <ProtectedRoute>
                   <Favorites />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin-upload" element={
+                <ProtectedRoute>
+                  <AdminUpload />
                 </ProtectedRoute>
               } />
             </Routes>

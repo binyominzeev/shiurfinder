@@ -23,14 +23,17 @@ const Navbar = () => {
               שיעור Finder
             </Link>
             <div className="hidden md:flex space-x-6">
-              <Link to="/" className={`px-3 py-2 transition-colors ${isActive('/')}`}>
+              <Link to="/" className={`px-3 py-2 transition-colors ${isActive('/')}`}> 
                 Dashboard
               </Link>
-              <Link to="/discovery" className={`px-3 py-2 transition-colors ${isActive('/discovery')}`}>
+              <Link to="/discovery" className={`px-3 py-2 transition-colors ${isActive('/discovery')}`}> 
                 Discover
               </Link>
-              <Link to="/favorites" className={`px-3 py-2 transition-colors ${isActive('/favorites')}`}>
+              <Link to="/favorites" className={`px-3 py-2 transition-colors ${isActive('/favorites')}`}> 
                 Favorites
+              </Link>
+              <Link to="/admin-upload" className={`px-3 py-2 transition-colors ${isActive('/admin-upload')}`}> 
+                Admin Upload
               </Link>
             </div>
           </div>
@@ -49,14 +52,17 @@ const Navbar = () => {
         {/* Mobile menu */}
         <div className="md:hidden pb-4">
           <div className="flex space-x-4">
-            <Link to="/" className={`px-3 py-2 text-sm transition-colors ${isActive('/')}`}>
+            <Link to="/" className={`px-3 py-2 text-sm transition-colors ${isActive('/')}`}> 
               Dashboard
             </Link>
-            <Link to="/discovery" className={`px-3 py-2 text-sm transition-colors ${isActive('/discovery')}`}>
+            <Link to="/discovery" className={`px-3 py-2 text-sm transition-colors ${isActive('/discovery')}`}> 
               Discover
             </Link>
-            <Link to="/favorites" className={`px-3 py-2 text-sm transition-colors ${isActive('/favorites')}`}>
+            <Link to="/favorites" className={`px-3 py-2 text-sm transition-colors ${isActive('/favorites')}`}> 
               Favorites
+            </Link>
+            <Link to="/admin-upload" className={`px-3 py-2 text-sm transition-colors ${isActive('/admin-upload')}`}> 
+              Admin Upload
             </Link>
           </div>
         </div>

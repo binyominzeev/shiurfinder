@@ -1,3 +1,11 @@
+// ...existing code...
+// Admin CSV upload dependencies (must be after app is defined)
+const multer = require('multer');
+const csv = require('csv-parse');
+const fs = require('fs');
+const upload = multer({ dest: 'uploads/' });
+
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -53,6 +61,7 @@ const shiurSchema = new mongoose.Schema({
   url: { type: String, required: true },
   duration: String,
   topic: String,
+  parasha: { type: String }, // Added for weekly parasha link
   level: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Intermediate' },
   views: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
@@ -202,6 +211,56 @@ const authenticateToken = (req, res, next) => {
 // Routes
 
 // Auth routes
+// Admin: Upload CSV of shiurim for a parasha
+app.post('/api/admin/upload-shiurim', authenticateToken, upload.single('file'), async (req, res) => {
+  try {
+    // Only allow admin (add your own admin check here)
+    // Example: if (req.user.role !== 'admin') return res.status(403).json({ message: 'Forbidden' });
+
+    const parasha = req.body.parasha;
+    if (!parasha) return res.status(400).json({ message: 'Parasha name required' });
+    if (!req.file) return res.status(400).json({ message: 'CSV file required' });
+
+    const filePath = req.file.path;
+    const records = [];
+    const parser = fs.createReadStream(filePath).pipe(csv.parse({ columns: true, trim: true }));
+
+    for await (const row of parser) {
+      // Expecting columns: author (rabbi), title, link
+      const rabbiName = row.author || row.rabbi;
+      const title = row.title;
+      const url = row.link;
+      if (!rabbiName || !title || !url) continue;
+
+      // Find or create rabbi
+      let rabbiDoc = await Rabbi.findOne({ name: rabbiName });
+      if (!rabbiDoc) {
+        rabbiDoc = new Rabbi({ name: rabbiName });
+        await rabbiDoc.save();
+      }
+
+      // Prepare shiur
+      records.push({
+        title,
+        rabbi: rabbiDoc._id,
+        url,
+        parasha,
+      });
+    }
+
+    // Bulk insert
+    if (records.length > 0) await Shiur.insertMany(records);
+
+    // Clean up uploaded file
+    fs.unlinkSync(filePath);
+
+    res.json({ message: `Imported ${records.length} shiurim for parasha ${parasha}` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 app.post('/api/auth/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
