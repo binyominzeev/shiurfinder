@@ -106,7 +106,9 @@ const Discovery = () => {
         <p className="text-gray-600">Help us personalize your learning experience</p>
       </div>
 
-      <ProgressIndicator steps={steps} currentStep={currentStep} />
+      <div className="py-4 border-b mb-8">
+        <ProgressIndicator steps={steps} currentStep={currentStep} />
+      </div>
 
       {currentStep === 1 && (
         <div>
@@ -116,24 +118,23 @@ const Discovery = () => {
               Browse through our shiurim and select 20-30 that interest you. 
               Selected: {selectedInterests.length}/30
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-blue-800">
-                  Progress: {selectedInterests.length} selected (need 20-30)
-                </span>
-                {canProceedToStep2 && (
-                  <button 
-                    onClick={handleNextStep}
-                    className="btn-primary"
-                  >
-                    Next: Choose Favorites →
-                  </button>
-                )}
-              </div>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sticky top-0 z-20" style={{background: '#eff6ff'}}>
+            <div className="flex justify-between items-center">
+              <span className="text-blue-800">
+                Progress: {selectedInterests.length} selected (need 20-30)
+              </span>
+              {canProceedToStep2 && (
+                <button 
+                  onClick={handleNextStep}
+                  className="btn-primary"
+                >
+                  Next: Choose Favorites →
+                </button>
+              )}
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             {getFilteredShiurim().map(shiur => (
               <ShiurCard
                 key={shiur._id}
