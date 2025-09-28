@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import ShiurCard from '../components/ShiurCard';
 
 const Favorites = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fullShiurim, setFullShiurim] = useState({}); // id -> full shiur object
 
   useEffect(() => {
     fetchUserProfile();
   }, []);
+
+  useEffect(() => {
+    if (userProfile) {
+      fetchFullShiurim();
+    }
+    // eslint-disable-next-line
+  }, [userProfile]);
 
   const fetchUserProfile = async () => {
     try {
@@ -21,6 +30,28 @@ const Favorites = () => {
     }
   };
 
+  // Fetch full shiur objects for all favorites and interests
+  const fetchFullShiurim = async () => {
+    const favIds = userProfile?.favorites?.map(s => s._id || s) || [];
+    const intIds = userProfile?.interests?.map(s => s._id || s) || [];
+    const allIds = Array.from(new Set([...favIds, ...intIds]));
+    if (allIds.length === 0) return;
+
+    try {
+      const response = await axios.get('/api/shiurim', {
+        params: { ids: allIds.join(',') }
+      });
+      // Assume response.data is an array of shiur objects
+      const shiurMap = {};
+      response.data.forEach(shiur => {
+        shiurMap[shiur._id] = shiur;
+      });
+      setFullShiurim(shiurMap);
+    } catch (error) {
+      console.error('Error fetching full shiurim:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64">
@@ -29,8 +60,8 @@ const Favorites = () => {
     );
   }
 
-  const favorites = userProfile?.favorites || [];
-  const interests = userProfile?.interests || [];
+  const favorites = (userProfile?.favorites || []).map(s => fullShiurim[s._id || s] || s);
+  const interests = (userProfile?.interests || []).map(s => fullShiurim[s._id || s] || s);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -55,11 +86,13 @@ const Favorites = () => {
           </div>
           <div className="text-gray-600">Interested Shiurim</div>
         </div>
-        <div className="card p-6 text-center">
-          <div className="text-3xl font-bold text-green-600 mb-2">
-            {userProfile?.following?.length || 0}
-          </div>
-          <div className="text-gray-600">Rabbis Following</div>
+        <div className="card p-6 text-center hover:bg-gray-50 cursor-pointer transition">
+          <Link to="/following" className="block">
+            <div className="text-3xl font-bold text-green-600 mb-2">
+              {userProfile?.following?.length || 0}
+            </div>
+            <div className="text-gray-600">Rabbis Following</div>
+          </Link>
         </div>
       </div>
 
@@ -71,7 +104,7 @@ const Favorites = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {favorites.map(shiur => (
-              <ShiurCard key={shiur._id} shiur={shiur} selectionMode="view" />
+              <ShiurCard key={shiur._id} shiur={shiur} selectionMode="view" showRabbi={true} />
             ))}
           </div>
         </div>
@@ -100,7 +133,7 @@ const Favorites = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {interests.filter(shiur => !favorites.some(fav => fav._id === shiur._id)).map(shiur => (
-              <ShiurCard key={shiur._id} shiur={shiur} selectionMode="view" />
+              <ShiurCard key={shiur._id} shiur={shiur} selectionMode="view" showRabbi={true} />
             ))}
           </div>
         </div>

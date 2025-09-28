@@ -11,6 +11,8 @@ const Discovery = () => {
   const [selectedFavorites, setSelectedFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [selectedParasha, setSelectedParasha] = useState('All');
+  const [parashot, setParashot] = useState([]);
   
   const navigate = useNavigate();
 
@@ -28,6 +30,12 @@ const Discovery = () => {
     try {
       const response = await axios.get('/api/shiurim');
       setShiurim(response.data);
+
+      // Extract unique parashot
+      const uniqueParashot = Array.from(
+        new Set(response.data.map(s => s.parasha).filter(Boolean))
+      );
+      setParashot(uniqueParashot);
     } catch (error) {
       console.error('Error fetching shiurim:', error);
     } finally {
@@ -83,10 +91,14 @@ const Discovery = () => {
   };
 
   const getFilteredShiurim = () => {
+    let filtered = shiurim;
+    if (selectedParasha !== 'All') {
+      filtered = filtered.filter(shiur => shiur.parasha === selectedParasha);
+    }
     if (currentStep === 1) {
-      return shiurim;
+      return filtered;
     } else if (currentStep === 2) {
-      return shiurim.filter(shiur => selectedInterests.includes(shiur._id));
+      return filtered.filter(shiur => selectedInterests.includes(shiur._id));
     }
     return [];
   };
@@ -104,6 +116,21 @@ const Discovery = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Discover Torah Shiurim</h1>
         <p className="text-gray-600">Help us personalize your learning experience</p>
+      </div>
+
+      {/* Parasha Chooser */}
+      <div className="mb-6">
+        <label className="block mb-1 font-medium text-gray-700">Filter by Parasha:</label>
+        <select
+          className="border rounded px-3 py-2"
+          value={selectedParasha}
+          onChange={e => setSelectedParasha(e.target.value)}
+        >
+          <option value="All">All Parashot</option>
+          {parashot.map(parasha => (
+            <option key={parasha} value={parasha}>{parasha}</option>
+          ))}
+        </select>
       </div>
 
       <div className="py-4 border-b mb-8">

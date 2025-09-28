@@ -1,4 +1,3 @@
-// ...existing code...
 // Admin CSV upload dependencies (must be after app is defined)
 const multer = require('multer');
 const csv = require('csv-parse');
@@ -438,29 +437,53 @@ app.get('/api/rabbis', async (req, res) => {
   }
 });
 
-app.post('/api/user/follow/:rabbiId', authenticateToken, async (req, res) => {
+app.post('/api/user/follow', authenticateToken, async (req, res) => {
   try {
+    const { rabbiId } = req.body;
+    if (!rabbiId) return res.status(400).json({ message: 'rabbiId required' });
+
     if (isMongoConnected) {
       const user = await User.findById(req.user.userId);
-      if (!user.following.includes(req.params.rabbiId)) {
-        user.following.push(req.params.rabbiId);
+      if (!user.following.includes(rabbiId)) {
+        user.following.push(rabbiId);
         await user.save();
-        
-        await Rabbi.findByIdAndUpdate(req.params.rabbiId, { $inc: { followers: 1 } });
+        await Rabbi.findByIdAndUpdate(rabbiId, { $inc: { followers: 1 } });
       }
     } else {
       const user = findMockUser({ _id: req.user.userId });
-      if (user && !user.following.includes(req.params.rabbiId)) {
-        user.following.push(req.params.rabbiId);
-        
-        const rabbi = mockRabbis.find(r => r._id === req.params.rabbiId);
-        if (rabbi) {
-          rabbi.followers += 1;
-        }
+      if (user && !user.following.includes(rabbiId)) {
+        user.following.push(rabbiId);
+        const rabbi = mockRabbis.find(r => r._id === rabbiId);
+        if (rabbi) rabbi.followers += 1;
       }
     }
-    
+
     res.json({ message: 'Following rabbi successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/api/user/unfollow', authenticateToken, async (req, res) => {
+  try {
+    const { rabbiId } = req.body;
+    if (!rabbiId) return res.status(400).json({ message: 'rabbiId required' });
+
+    if (isMongoConnected) {
+      const user = await User.findById(req.user.userId);
+      user.following = user.following.filter(id => id.toString() !== rabbiId);
+      await user.save();
+      await Rabbi.findByIdAndUpdate(rabbiId, { $inc: { followers: -1 } });
+    } else {
+      const user = findMockUser({ _id: req.user.userId });
+      if (user) {
+        user.following = user.following.filter(id => id !== rabbiId);
+        const rabbi = mockRabbis.find(r => r._id === rabbiId);
+        if (rabbi && rabbi.followers > 0) rabbi.followers -= 1;
+      }
+    }
+
+    res.json({ message: 'Unfollowed rabbi successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

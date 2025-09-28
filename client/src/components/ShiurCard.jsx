@@ -1,9 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 
-const ShiurCard = ({ shiur, isSelected, onToggle, selectionMode = 'view', showRabbi = true }) => {
+const ShiurCard = ({
+  shiur,
+  isSelected,
+  onToggle,
+  selectionMode = 'view',
+  showRabbi = true,
+  onRabbiFollow // Optional callback to update parent state
+}) => {
+  const [addingRabbi, setAddingRabbi] = useState(false);
+  const [followed, setFollowed] = useState(false);
+
   const handleExternalClick = (e) => {
     e.stopPropagation();
     window.open(shiur.url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleFollowRabbi = async (e) => {
+    e.stopPropagation();
+    if (!shiur.rabbi || !shiur.rabbi._id) return;
+    setAddingRabbi(true);
+    try {
+      await axios.post('/api/user/follow', { rabbiId: shiur.rabbi._id });
+      setFollowed(true);
+      if (onRabbiFollow) onRabbiFollow(shiur.rabbi._id);
+    } catch (err) {
+      // Optionally show error
+    } finally {
+      setAddingRabbi(false);
+    }
   };
 
   const getLevelColor = (level) => {
@@ -32,9 +58,6 @@ const ShiurCard = ({ shiur, isSelected, onToggle, selectionMode = 'view', showRa
       {/* Selection indicator */}
       {selectionMode !== 'view' && (
         <div className="flex justify-between items-start mb-3">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getLevelColor(shiur.level)}`}>
-            {shiur.level}
-          </span>
           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
             isSelected 
               ? selectionMode === 'favorite' 
@@ -53,9 +76,6 @@ const ShiurCard = ({ shiur, isSelected, onToggle, selectionMode = 'view', showRa
 
       {selectionMode === 'view' && (
         <div className="flex justify-between items-start mb-3">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getLevelColor(shiur.level)}`}>
-            {shiur.level}
-          </span>
           <div className="flex items-center text-gray-500 text-sm">
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -83,9 +103,22 @@ const ShiurCard = ({ shiur, isSelected, onToggle, selectionMode = 'view', showRa
               {typeof shiur.rabbi.name === 'string' ? shiur.rabbi.name.split(' ').map(n => n[0]).join('') : ''}
             </span>
           </div>
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-medium text-gray-900 mr-2">
             {shiur.rabbi.name}
           </span>
+          {/* Add/Show Follow Button */}
+          {!followed ? (
+            <button
+              className="ml-2 px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 hover:bg-primary-200 transition disabled:opacity-50"
+              onClick={handleFollowRabbi}
+              disabled={addingRabbi}
+              title="Add Rabbi to Following"
+            >
+              {addingRabbi ? 'Adding...' : 'Follow'}
+            </button>
+          ) : (
+            <span className="ml-2 text-green-600 text-xs font-semibold">Following</span>
+          )}
         </div>
       )}
 

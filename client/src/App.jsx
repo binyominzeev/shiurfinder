@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Discovery from './pages/Discovery';
 import Favorites from './pages/Favorites';
 import AdminUpload from './pages/AdminUpload';
+import Following from './pages/Following';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -43,6 +44,11 @@ function App() {
               <Route path="/admin-upload" element={
                 <ProtectedRoute>
                   <AdminUpload />
+                </ProtectedRoute>
+              } />
+              <Route path="/following" element={
+                <ProtectedRoute>
+                  <Following />
                 </ProtectedRoute>
               } />
             </Routes>
