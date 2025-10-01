@@ -306,24 +306,37 @@ app.post('/api/auth/signup', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+    console.log('[LOGIN] Attempt:', email);
+
     let user;
     if (isMongoConnected) {
       user = await User.findOne({ email });
     } else {
       user = findMockUser({ email });
     }
-    
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    console.log('[LOGIN] User found:', !!user);
+
+    if (!user) {
+      console.log('[LOGIN] No user found for:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    console.log('[LOGIN] Password match:', passwordMatch);
+
+    if (!passwordMatch) {
+      console.log('[LOGIN] Password mismatch for:', email);
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'fallback-secret');
+    console.log('[LOGIN] Success for:', email);
     res.json({ 
       token, 
       user: { id: user._id, username: user.username, email: user.email } 
     });
   } catch (error) {
+    console.error('[LOGIN] Error:', error);
     res.status(500).json({ message: error.message });
   }
 });
