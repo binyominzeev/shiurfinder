@@ -15,15 +15,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Set up axios defaults
-//  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-//  axios.defaults.baseURL = API_URL;
-
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Verify token is still valid
       fetchProfile();
     } else {
       setLoading(false);
@@ -43,16 +38,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
+    setLoading(true);
     try {
       const response = await axios.post('/api/auth/login', { email, password });
-      const { token, user } = response.data;
-      
+      const { token } = response.data;
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
-      
+      await fetchProfile(); // Always fetch fresh profile
       return { success: true };
     } catch (error) {
+      setLoading(false);
       return { 
         success: false, 
         error: error.response?.data?.message || 'Login failed' 
@@ -61,16 +56,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (username, email, password) => {
+    setLoading(true);
     try {
       const response = await axios.post('/api/auth/signup', { username, email, password });
-      const { token, user } = response.data;
-      
+      const { token } = response.data;
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
-      
+      await fetchProfile(); // Always fetch fresh profile
       return { success: true };
     } catch (error) {
+      setLoading(false);
       return { 
         success: false, 
         error: error.response?.data?.message || 'Signup failed' 
@@ -82,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
+    setLoading(false);
   };
 
   const value = {
