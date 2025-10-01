@@ -10,6 +10,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -64,6 +66,12 @@ const shiurSchema = new mongoose.Schema({
   level: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Intermediate' },
   views: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
+});
+
+// Add to userSchema for password reset
+userSchema.add({
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 });
 
 const User = mongoose.model('User', userSchema);
@@ -484,6 +492,87 @@ app.post('/api/user/unfollow', authenticateToken, async (req, res) => {
     }
 
     res.json({ message: 'Unfollowed rabbi successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// --- Password Reset Request Endpoint ---
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email required' });
+
+  try {
+    let user;
+    if (isMongoConnected) {
+      user = await User.findOne({ email });
+    } else {
+      user = findMockUser({ email });
+    }
+    if (!user) {
+      // Respond with success to prevent email enumeration
+      return res.json({ message: 'If an account exists for this email, a reset link has been sent.' });
+    }
+
+    // Generate token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = Date.now() + 1000 * 60 * 60; // 1 hour
+
+    if (isMongoConnected) {
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = expires;
+      await user.save();
+    } else {
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = expires;
+    }
+
+    // Send email (configure your SMTP in .env)
+    const transporter = nodemailer.createTransport({
+      sendmail: true,
+      newline: 'unix',
+      path: '/usr/sbin/sendmail'
+    });
+
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${token}`;
+    await transporter.sendMail({
+      to: email,
+      from: process.env.SMTP_FROM || 'no-reply@shiurfinder.com',
+      subject: 'ShiurFinder Password Reset',
+      html: `<p>You requested a password reset.</p>
+             <p>Click <a href="${resetUrl}">here</a> to reset your password. This link is valid for 1 hour.</p>`
+    });
+
+    res.json({ message: 'If an account exists for this email, a reset link has been sent.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// --- Password Reset Confirm Endpoint ---
+app.post('/api/auth/reset-password/confirm', async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ message: 'Token and new password required' });
+
+  try {
+    let user;
+    if (isMongoConnected) {
+      user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() }
+      });
+    } else {
+      user = mockUsers.find(u => u.resetPasswordToken === token && u.resetPasswordExpires > Date.now());
+    }
+    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+
+    const hashed = await bcrypt.hash(password, 12);
+    user.password = hashed;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    if (isMongoConnected) await user.save();
+
+    res.json({ message: 'Password has been reset successfully.' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
