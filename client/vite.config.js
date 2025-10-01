@@ -9,7 +9,7 @@ export default defineConfig({
     allowedHosts: ['sf.vidfaq.com'], // 👈 add your domain here
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://sf.vidfaq.com:5002',
         changeOrigin: true,
       },
     },
