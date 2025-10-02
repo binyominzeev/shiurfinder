@@ -60,7 +60,7 @@ const Favorites = () => {
         title: shiur.title,
         url: shiur.url, // The URL to fetch and extract mp3_url from
       }));
-      const res = await fetch('/api/rss/export-favorites', {
+      const res = await fetch('/api/export-favorites', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
