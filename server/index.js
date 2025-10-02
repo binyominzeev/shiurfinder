@@ -720,3 +720,8 @@ app.post('/api/admin/backup-mongodb', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Backup failed', error: err.message });
   }
 });
+
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
