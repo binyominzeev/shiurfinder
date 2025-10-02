@@ -5,10 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: ['sf.vidfaq.com'], // 👈 add your domain here
+    allowedHosts: ['myshiurim.com'], // 👈 add your domain here
     proxy: {
       '/api': {
-        target: 'http://sf.vidfaq.com:5002',
+        target: 'http://myshiurim.com:5002',
         changeOrigin: true,
       },
     },
