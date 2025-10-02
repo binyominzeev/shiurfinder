@@ -60,14 +60,21 @@ const Favorites = () => {
         title: shiur.title,
         url: shiur.url, // The URL to fetch and extract mp3_url from
       }));
-      const res = await axios.post('/api/rss/export-favorites', { favorites: favoritesToSend });
-      if (res.data.success) {
+      const res = await fetch('/api/rss/export-favorites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ favorites: favoritesToSend }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
         alert('RSS feed uploaded successfully!');
       } else {
-        alert('RSS export failed.');
+        alert('RSS export failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
-      alert('RSS export failed: ' + (err.response?.data?.error || err.message));
+      alert('RSS export failed: ' + err.message);
     }
   };
 
