@@ -32,9 +32,11 @@ const Navbar = () => {
               <Link to="/favorites" className={`px-3 py-2 transition-colors ${isActive('/favorites')}`}> 
                 Favorites
               </Link>
-              <Link to="/admin-upload" className={`px-3 py-2 transition-colors ${isActive('/admin-upload')}`}> 
-                Admin Upload
-              </Link>
+              {user.email === 'szvbinjomin@gmail.com' && (
+                <Link to="/admin-upload" className={`px-3 py-2 transition-colors ${isActive('/admin-upload')}`}> 
+                  Admin Upload
+                </Link>
+              )}
             </div>
           </div>
           
@@ -61,9 +63,11 @@ const Navbar = () => {
             <Link to="/favorites" className={`px-3 py-2 text-sm transition-colors ${isActive('/favorites')}`}> 
               Favorites
             </Link>
-            <Link to="/admin-upload" className={`px-3 py-2 text-sm transition-colors ${isActive('/admin-upload')}`}> 
-              Admin Upload
-            </Link>
+            {user.email === 'szvbinjomin@gmail.com' && (
+              <Link to="/admin-upload" className={`px-3 py-2 text-sm transition-colors ${isActive('/admin-upload')}`}> 
+                Admin Upload
+              </Link>
+            )}
           </div>
         </div>
       </div>
