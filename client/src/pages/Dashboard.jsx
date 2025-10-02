@@ -140,23 +140,6 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-
-      {/* Suggested Rabbis */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Suggested Rabbis</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {suggestedRabbis.map(rabbi => (
-            <RabbiCard 
-              key={rabbi._id} 
-              rabbi={rabbi} 
-              isFollowing={userProfile?.following?.some(f => f._id === rabbi._id)}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
   );
 };
 
