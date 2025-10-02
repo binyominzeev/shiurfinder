@@ -7,6 +7,8 @@ const AdminUpload = () => {
   const [loading, setLoading] = useState(false);
   const [backupMessage, setBackupMessage] = useState('');
   const [backupLoading, setBackupLoading] = useState(false);
+  const [removeMessage, setRemoveMessage] = useState('');
+  const [removeLoading, setRemoveLoading] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -67,6 +69,29 @@ const AdminUpload = () => {
     setBackupLoading(false);
   };
 
+  const handleRemoveShiurimWithDuration = async () => {
+    setRemoveLoading(true);
+    setRemoveMessage('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/admin/remove-shiurim-with-duration', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRemoveMessage(data.message || 'Shiurim removed.');
+      } else {
+        setRemoveMessage(data.message || 'Failed to remove.');
+      }
+    } catch (err) {
+      setRemoveMessage('Error during removal.');
+    }
+    setRemoveLoading(false);
+  };
+
   return (
     <div style={{ maxWidth: 400, margin: '2rem auto', padding: 24, border: '1px solid #ccc', borderRadius: 8 }}>
       <h2>Admin Shiurim CSV Upload</h2>
@@ -94,11 +119,19 @@ const AdminUpload = () => {
         <button
           onClick={handleBackup}
           disabled={backupLoading}
-          style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 4 }}
+          style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 4, marginRight: 8 }}
         >
           {backupLoading ? 'Backing up...' : 'Backup MongoDB'}
         </button>
+        <button
+          onClick={handleRemoveShiurimWithDuration}
+          disabled={removeLoading}
+          style={{ padding: '8px 16px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: 4 }}
+        >
+          {removeLoading ? 'Removing...' : 'Remove Shiurim With Duration'}
+        </button>
         {backupMessage && <div style={{ marginTop: 12 }}>{backupMessage}</div>}
+        {removeMessage && <div style={{ marginTop: 12 }}>{removeMessage}</div>}
       </div>
       {message && <div style={{ marginTop: 16 }}>{message}</div>}
     </div>

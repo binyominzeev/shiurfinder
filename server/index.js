@@ -721,6 +721,32 @@ app.post('/api/admin/backup-mongodb', authenticateToken, async (req, res) => {
   }
 });
 
+// --- Remove Shiurim With Duration Endpoint ---
+app.post('/api/admin/remove-shiurim-with-duration', authenticateToken, async (req, res) => {
+  try {
+    // Only allow admin (by email)
+    //if (!req.user || req.user.email !== 'szvbinjomin@gmail.com') {
+    //  return res.status(403).json({ message: 'Forbidden: Admins only' });
+    //}
+
+    let removedCount = 0;
+
+    if (isMongoConnected) {
+      const result = await Shiur.deleteMany({ duration: { $exists: true, $ne: null } });
+      removedCount = result.deletedCount;
+    } else {
+      const before = mockShiurim.length;
+      mockShiurim = mockShiurim.filter(s => !s.duration);
+      removedCount = before - mockShiurim.length;
+    }
+
+    res.json({ message: `Removed ${removedCount} shiurim with a duration field.` });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to remove shiurim.', error: err.message });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
