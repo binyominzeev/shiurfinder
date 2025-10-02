@@ -600,6 +600,9 @@ function extractMp3Url(str) {
 }
 
 app.post('/api/export-favorites', async (req, res) => {
+  console.log('[DEBUG] /api/export-favorites called');
+  console.log('[DEBUG] Request body:', req.body);
+
   const { favorites } = req.body; // [{title, url, _id}, ...]
   try {
     // Fetch and extract mp3_url for each favorite
@@ -607,9 +610,12 @@ app.post('/api/export-favorites', async (req, res) => {
       let mp3Url = null;
       if (shiur.url) {
         try {
+          console.log(`[DEBUG] Fetching URL: ${shiur.url}`);
           const resp = await axios.get(shiur.url);
           mp3Url = extractMp3Url(resp.data);
+          console.log(`[DEBUG] Extracted mp3_url: ${mp3Url}`);
         } catch (e) {
+          console.error(`[ERROR] Fetching or extracting mp3_url for ${shiur.url}:`, e.message);
           mp3Url = null;
         }
       }
@@ -645,7 +651,11 @@ app.post('/api/export-favorites', async (req, res) => {
     client.on('ready', () => {
       client.put(Buffer.from(xml), '/public_html/podcast_feed.xml', (err) => {
         client.end();
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) {
+          console.error('[ERROR] FTP upload failed:', err.message);
+          return res.status(500).json({ error: err.message });
+        }
+        console.log('[DEBUG] RSS feed uploaded successfully!');
         return res.json({ success: true });
       });
     });
@@ -655,6 +665,7 @@ app.post('/api/export-favorites', async (req, res) => {
       password: process.env.FTP_PASSWORD,
     });
   } catch (err) {
+    console.error('[ERROR] /api/export-favorites failed:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
