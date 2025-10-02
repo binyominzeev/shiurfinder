@@ -595,7 +595,9 @@ app.post('/api/auth/reset-password/confirm', async (req, res) => {
 
 // RSS Feed routes
 function extractMp3Url(str) {
-  const match = str.match(/"mp3_url"\s*:\s*"([^"]+)"/);
+  let match = str.match(/\\?"mp3_url"\\?\s*:\s*\\?"([^"\\]+)\\?"/);
+  if (match) return match[1];
+  match = str.match(/"mp3_url"\s*:\s*"([^"]+)"/);
   return match ? match[1] : null;
 }
 
