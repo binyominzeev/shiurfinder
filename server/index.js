@@ -307,19 +307,19 @@ app.post('/api/auth/signup', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    console.log('[LOGIN] Attempt:', email);
+    const { username, password } = req.body;
+    console.log('[LOGIN] Attempt:', username);
 
     let user;
     if (isMongoConnected) {
-      user = await User.findOne({ email });
+      user = await User.findOne({ username });
     } else {
-      user = findMockUser({ email });
+      user = findMockUser({ username });
     }
     console.log('[LOGIN] User found:', !!user);
 
     if (!user) {
-      console.log('[LOGIN] No user found for:', email);
+      console.log('[LOGIN] No user found for:', username);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
@@ -327,12 +327,12 @@ app.post('/api/auth/login', async (req, res) => {
     console.log('[LOGIN] Password match:', passwordMatch);
 
     if (!passwordMatch) {
-      console.log('[LOGIN] Password mismatch for:', email);
+      console.log('[LOGIN] Password mismatch for:', username);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'fallback-secret');
-    console.log('[LOGIN] Success for:', email);
+    console.log('[LOGIN] Success for:', username);
     res.json({ 
       token, 
       user: { id: user._id, username: user.username, email: user.email } 

@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
   const [error, setError] = useState('');
@@ -29,14 +29,14 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    const result = await login(formData.email, formData.password);
-    
+    const result = await login(formData.username, formData.password);
+
     if (result.success) {
       navigate('/');
     } else {
       setError(result.error);
     }
-    
+
     setLoading(false);
   };
 
@@ -130,17 +130,17 @@ const Login = () => {
             )}
             <div className="space-y-4">
               <div>
-                <label htmlFor="email" className="sr-only">
-                  Email address
+                <label htmlFor="username" className="sr-only">
+                  Username
                 </label>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
+                  id="username"
+                  name="username"
+                  type="text"
                   required
                   className="input-field"
-                  placeholder="Email address"
-                  value={formData.email}
+                  placeholder="Username"
+                  value={formData.username}
                   onChange={handleChange}
                 />
               </div>
