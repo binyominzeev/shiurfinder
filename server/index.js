@@ -696,6 +696,31 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running', timestamp: new Date().toISOString() });
 });
 
+// --- MongoDB Backup Endpoint ---
+app.post('/api/admin/backup-mongodb', authenticateToken, async (req, res) => {
+  try {
+    // Only allow admin (by email)
+    if (!req.user || req.user.email !== 'szvbinjomin@gmail.com') {
+      return res.status(403).json({ message: 'Forbidden: Admins only' });
+    }
+
+    // Use mongodump to create a backup (requires mongodump installed on server)
+    const { exec } = require('child_process');
+    const backupDir = `backup_${Date.now()}`;
+    const dumpCmd = `mongodump --uri="${MONGODB_URI}" --out="./${backupDir}"`;
+
+    exec(dumpCmd, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Backup error:', error);
+        return res.status(500).json({ message: 'Backup failed', error: stderr || error.message });
+      }
+      res.json({ message: `Backup successful! Directory: ${backupDir}` });
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Backup failed', error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
