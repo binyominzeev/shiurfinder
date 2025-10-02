@@ -600,35 +600,54 @@ function extractMp3Url(str) {
   return match ? match[1] : null;
 }
 
+// RSS Feed routes
+function extractDuration(str) {
+  // Matches \"duration\":\"...\"
+  const match = str.match(/\\"duration\\":\\"([^"]+)\\"/);
+  return match ? match[1] : null;
+}
+
+function formatDuration(seconds) {
+  if (!seconds || isNaN(seconds)) return '';
+  seconds = parseInt(seconds, 10);
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return [h, m, s]
+    .map(unit => String(unit).padStart(2, '0'))
+    .join(':');
+}
+
 app.post('/api/export-favorites', async (req, res) => {
   console.log('[DEBUG] /api/export-favorites called');
   console.log('[DEBUG] Request body:', req.body);
 
   const { favorites } = req.body; // [{title, url, _id}, ...]
   try {
-    // Fetch and extract mp3_url for each favorite
+    const today = new Date();
+    const pubDate = today.toUTCString();
+
     const items = await Promise.all(favorites.map(async (shiur, idx) => {
       let mp3Url = null;
+      let duration = null;
       let fetchedData = null;
       if (shiur.url) {
         try {
-          console.log(`[DEBUG] Fetching URL: ${shiur.url}`);
           const resp = await axios.get(shiur.url);
           fetchedData = resp.data;
           mp3Url = extractMp3Url(fetchedData);
-          console.log(`[DEBUG] Extracted mp3_url: ${mp3Url}`);
+          duration = extractDuration(fetchedData);
         } catch (e) {
-          console.error(`[ERROR] Fetching or extracting mp3_url for ${shiur.url}:`, e.message);
           mp3Url = null;
         }
       }
       return {
         ...shiur,
         mp3_url: mp3Url,
+        duration: duration,
       };
     }));
 
-    // Generate RSS XML
     const itemsXml = items
       .filter(shiur => shiur.mp3_url && shiur.title)
       .map(shiur => `
@@ -636,6 +655,8 @@ app.post('/api/export-favorites', async (req, res) => {
           <title><![CDATA[${shiur.title}]]></title>
           <enclosure url="${shiur.mp3_url}" type="audio/mpeg" />
           <guid>${shiur._id}</guid>
+          <pubDate>${pubDate}</pubDate>
+          <itunes:duration>${formatDuration(shiur.duration)}</itunes:duration>
         </item>
       `)
       .join('\n');
