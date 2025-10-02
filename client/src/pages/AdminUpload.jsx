@@ -5,6 +5,8 @@ const AdminUpload = () => {
   const [parasha, setParasha] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [backupMessage, setBackupMessage] = useState('');
+  const [backupLoading, setBackupLoading] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -42,6 +44,29 @@ const AdminUpload = () => {
     setLoading(false);
   };
 
+  const handleBackup = async () => {
+    setBackupLoading(true);
+    setBackupMessage('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/admin/backup-mongodb', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setBackupMessage(data.message || 'Backup successful!');
+      } else {
+        setBackupMessage(data.message || 'Backup failed.');
+      }
+    } catch (err) {
+      setBackupMessage('Error during backup.');
+    }
+    setBackupLoading(false);
+  };
+
   return (
     <div style={{ maxWidth: 400, margin: '2rem auto', padding: 24, border: '1px solid #ccc', borderRadius: 8 }}>
       <h2>Admin Shiurim CSV Upload</h2>
@@ -65,6 +90,16 @@ const AdminUpload = () => {
           {loading ? 'Uploading...' : 'Upload'}
         </button>
       </form>
+      <div style={{ marginTop: 24 }}>
+        <button
+          onClick={handleBackup}
+          disabled={backupLoading}
+          style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 4 }}
+        >
+          {backupLoading ? 'Backing up...' : 'Backup MongoDB'}
+        </button>
+        {backupMessage && <div style={{ marginTop: 12 }}>{backupMessage}</div>}
+      </div>
       {message && <div style={{ marginTop: 16 }}>{message}</div>}
     </div>
   );
