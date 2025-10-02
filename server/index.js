@@ -606,13 +606,20 @@ app.post('/api/export-favorites', async (req, res) => {
   const { favorites } = req.body; // [{title, url, _id}, ...]
   try {
     // Fetch and extract mp3_url for each favorite
-    const items = await Promise.all(favorites.map(async shiur => {
+    const items = await Promise.all(favorites.map(async (shiur, idx) => {
       let mp3Url = null;
+      let fetchedData = null;
       if (shiur.url) {
         try {
           console.log(`[DEBUG] Fetching URL: ${shiur.url}`);
           const resp = await axios.get(shiur.url);
-          mp3Url = extractMp3Url(resp.data);
+          fetchedData = resp.data;
+          // Save the first 2 fetched responses for debugging
+          if (idx < 2) {
+            fs.writeFileSync(`debug_fetched_${idx}.html`, fetchedData);
+            console.log(`[DEBUG] Saved fetched HTML to debug_fetched_${idx}.html`);
+          }
+          mp3Url = extractMp3Url(fetchedData);
           console.log(`[DEBUG] Extracted mp3_url: ${mp3Url}`);
         } catch (e) {
           console.error(`[ERROR] Fetching or extracting mp3_url for ${shiur.url}:`, e.message);
