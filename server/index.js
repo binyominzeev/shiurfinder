@@ -700,9 +700,9 @@ app.get('/api/health', (req, res) => {
 app.post('/api/admin/backup-mongodb', authenticateToken, async (req, res) => {
   try {
     // Only allow admin (by email)
-    if (!req.user || req.user.email !== 'szvbinjomin@gmail.com') {
-      return res.status(403).json({ message: 'Forbidden: Admins only' });
-    }
+    //if (!req.user || req.user.email !== 'szvbinjomin@gmail.com') {
+    //  return res.status(403).json({ message: 'Forbidden: Admins only' });
+    //}
 
     // Use mongodump to create a backup (requires mongodump installed on server)
     const { exec } = require('child_process');
