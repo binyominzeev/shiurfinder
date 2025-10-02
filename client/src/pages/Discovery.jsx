@@ -4,6 +4,9 @@ import axios from 'axios';
 import ShiurCard from '../components/ShiurCard';
 import ProgressIndicator from '../components/ProgressIndicator';
 
+// Set your default parasha here
+const DEFAULT_PARASHA = 'Haazinu';
+
 const Discovery = () => {
   const [shiurim, setShiurim] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
@@ -11,7 +14,8 @@ const Discovery = () => {
   const [selectedFavorites, setSelectedFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [selectedParasha, setSelectedParasha] = useState('All');
+  // Use DEFAULT_PARASHA as the initial value
+  const [selectedParasha, setSelectedParasha] = useState(DEFAULT_PARASHA);
   const [parashot, setParashot] = useState([]);
   
   const navigate = useNavigate();
