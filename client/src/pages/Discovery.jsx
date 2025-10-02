@@ -35,10 +35,13 @@ const Discovery = () => {
       const response = await axios.get('/api/shiurim');
       setShiurim(response.data);
 
-      // Extract unique parashot
+      // Extract unique parashot and ensure DEFAULT_PARASHA is included
       const uniqueParashot = Array.from(
         new Set(response.data.map(s => s.parasha).filter(Boolean))
       );
+      if (!uniqueParashot.includes(DEFAULT_PARASHA)) {
+        uniqueParashot.unshift(DEFAULT_PARASHA);
+      }
       setParashot(uniqueParashot);
     } catch (error) {
       console.error('Error fetching shiurim:', error);
