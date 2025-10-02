@@ -595,9 +595,8 @@ app.post('/api/auth/reset-password/confirm', async (req, res) => {
 
 // RSS Feed routes
 function extractMp3Url(str) {
-  let match = str.match(/\\?"mp3_url"\\?\s*:\s*\\?"([^"\\]+)\\?"/);
-  if (match) return match[1];
-  match = str.match(/"mp3_url"\s*:\s*"([^"]+)"/);
+  // Matches \"mp3_url\":\"...\"
+  const match = str.match(/\\"mp3_url\\":\\"([^"]+)\\"/);
   return match ? match[1] : null;
 }
 
@@ -616,11 +615,6 @@ app.post('/api/export-favorites', async (req, res) => {
           console.log(`[DEBUG] Fetching URL: ${shiur.url}`);
           const resp = await axios.get(shiur.url);
           fetchedData = resp.data;
-          // Save the first 2 fetched responses for debugging
-          if (idx < 2) {
-            fs.writeFileSync(`debug_fetched_${idx}.html`, fetchedData);
-            console.log(`[DEBUG] Saved fetched HTML to debug_fetched_${idx}.html`);
-          }
           mp3Url = extractMp3Url(fetchedData);
           console.log(`[DEBUG] Extracted mp3_url: ${mp3Url}`);
         } catch (e) {
