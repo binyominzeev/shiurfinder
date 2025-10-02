@@ -619,9 +619,6 @@ function formatDuration(seconds) {
 }
 
 app.post('/api/export-favorites', async (req, res) => {
-  console.log('[DEBUG] /api/export-favorites called');
-  console.log('[DEBUG] Request body:', req.body);
-
   const { favorites } = req.body; // [{title, url, _id}, ...]
   try {
     const today = new Date();
