@@ -52,6 +52,25 @@ const Favorites = () => {
     }
   };
 
+  // Handler for export button (calls backend)
+  const handleExportRss = async () => {
+    try {
+      const favoritesToSend = favorites.map(shiur => ({
+        _id: shiur._id,
+        title: shiur.title,
+        url: shiur.url, // The URL to fetch and extract mp3_url from
+      }));
+      const res = await axios.post('/api/rss/export-favorites', { favorites: favoritesToSend });
+      if (res.data.success) {
+        alert('RSS feed uploaded successfully!');
+      } else {
+        alert('RSS export failed.');
+      }
+    } catch (err) {
+      alert('RSS export failed: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64">
@@ -95,6 +114,18 @@ const Favorites = () => {
           </Link>
         </div>
       </div>
+
+      {/* Export RSS Button */}
+      {favorites.length > 0 && (
+        <div className="mb-4 flex justify-end">
+          <button
+            className="btn-primary"
+            onClick={handleExportRss}
+          >
+            Export Top Picks as RSS
+          </button>
+        </div>
+      )}
 
       {/* Favorites Section */}
       {favorites.length > 0 ? (

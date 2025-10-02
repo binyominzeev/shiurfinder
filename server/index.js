@@ -12,6 +12,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
+const FTP = require('ftp');
 require('dotenv').config();
 
 const app = express();
@@ -588,6 +590,72 @@ app.post('/api/auth/reset-password/confirm', async (req, res) => {
     res.json({ message: 'Password has been reset successfully.' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// RSS Feed routes
+function extractMp3Url(str) {
+  const match = str.match(/"mp3_url"\s*:\s*"([^"]+)"/);
+  return match ? match[1] : null;
+}
+
+app.post('/api/export-favorites', async (req, res) => {
+  const { favorites } = req.body; // [{title, url, _id}, ...]
+  try {
+    // Fetch and extract mp3_url for each favorite
+    const items = await Promise.all(favorites.map(async shiur => {
+      let mp3Url = null;
+      if (shiur.url) {
+        try {
+          const resp = await axios.get(shiur.url);
+          mp3Url = extractMp3Url(resp.data);
+        } catch (e) {
+          mp3Url = null;
+        }
+      }
+      return {
+        ...shiur,
+        mp3_url: mp3Url,
+      };
+    }));
+
+    // Generate RSS XML
+    const itemsXml = items
+      .filter(shiur => shiur.mp3_url && shiur.title)
+      .map(shiur => `
+        <item>
+          <title><![CDATA[${shiur.title}]]></title>
+          <enclosure url="${shiur.mp3_url}" type="audio/mpeg" />
+          <guid>${shiur._id}</guid>
+        </item>
+      `)
+      .join('\n');
+    const xml = `<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+<channel>
+<title>My Shiurim Podcast</title>
+<link>https://binjomin.hu/</link>
+<description>A collection of parasha from YT / YuT.</description>
+<language>en-us</language>
+    ${itemsXml}
+  </channel>
+</rss>`;
+
+    // Upload via FTP
+    const client = new FTP();
+    client.on('ready', () => {
+      client.put(Buffer.from(xml), '/public_html/podcast_feed.xml', (err) => {
+        client.end();
+        if (err) return res.status(500).json({ error: err.message });
+        return res.json({ success: true });
+      });
+    });
+    client.connect({
+      host: process.env.FTP_HOST,
+      user: process.env.FTP_USER,
+      password: process.env.FTP_PASSWORD,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
