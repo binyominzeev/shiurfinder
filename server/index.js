@@ -602,8 +602,8 @@ function extractMp3Url(str) {
 
 // RSS Feed routes
 function extractDuration(str) {
-  // Matches \"duration\":\"...\"
-  const match = str.match(/\\"duration\\":\\"([^"]+)\\"/);
+  // Matches \"duration\":...,
+  const match = str.match(/\\"duration\\":([^,]+),/);
   return match ? match[1] : null;
 }
 
