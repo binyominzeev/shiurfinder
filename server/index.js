@@ -620,6 +620,7 @@ function formatDuration(seconds) {
 
 app.post('/api/export-favorites', async (req, res) => {
   const { favorites } = req.body; // [{title, url, _id}, ...]
+  console.log('Received favorites:', favorites); // <-- Add this line
   try {
     const today = new Date();
     const pubDate = today.toUTCString();

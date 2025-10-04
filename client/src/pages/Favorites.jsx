@@ -58,8 +58,8 @@ const Favorites = () => {
       const favoritesToSend = favorites.map(shiur => ({
         _id: shiur._id,
         title: shiur.title,
-        url: shiur.url, // The URL to fetch and extract mp3_url from
-        rabbiName: shiur.rabbi?.name || shiur.rabbi || '', // Add rabbi's name
+        url: shiur.url,
+        rabbiName: shiur.rabbi && typeof shiur.rabbi === 'object' ? shiur.rabbi.name : '', // Always a string
       }));
       const res = await fetch('/api/export-favorites', {
         method: 'POST',
@@ -89,8 +89,6 @@ const Favorites = () => {
 
   const favorites = (userProfile?.favorites || []).map(s => fullShiurim[s._id || s] || s);
   const interests = (userProfile?.interests || []).map(s => fullShiurim[s._id || s] || s);
-
-  console.log('favorites:', favorites);
 
   return (
     <div className="max-w-6xl mx-auto">
