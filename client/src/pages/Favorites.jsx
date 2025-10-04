@@ -59,7 +59,7 @@ const Favorites = () => {
         _id: shiur._id,
         title: shiur.title,
         url: shiur.url,
-        rabbiName: shiur.rabbi && typeof shiur.rabbi === 'object' ? shiur.rabbi.name : '', // Always a string
+        rabbiName: (shiur.rabbi && typeof shiur.rabbi === 'object' ? shiur.rabbi.name : ''), // Always a string
       }));
       const res = await fetch('/api/export-favorites', {
         method: 'POST',
