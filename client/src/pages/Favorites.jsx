@@ -90,6 +90,8 @@ const Favorites = () => {
   const favorites = (userProfile?.favorites || []).map(s => fullShiurim[s._id || s] || s);
   const interests = (userProfile?.interests || []).map(s => fullShiurim[s._id || s] || s);
 
+  console.log('favorites:', favorites);
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
