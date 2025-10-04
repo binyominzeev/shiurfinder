@@ -5,7 +5,7 @@ import ShiurCard from '../components/ShiurCard';
 import ProgressIndicator from '../components/ProgressIndicator';
 
 // Set your default parasha here
-const DEFAULT_PARASHA = 'Haazinu';
+const DEFAULT_PARASHA = 'Sukkot';
 
 const Discovery = () => {
   const [shiurim, setShiurim] = useState([]);

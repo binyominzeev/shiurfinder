@@ -59,6 +59,7 @@ const Favorites = () => {
         _id: shiur._id,
         title: shiur.title,
         url: shiur.url, // The URL to fetch and extract mp3_url from
+        rabbiName: shiur.rabbi?.name || shiur.rabbi || '', // Add rabbi's name
       }));
       const res = await fetch('/api/export-favorites', {
         method: 'POST',

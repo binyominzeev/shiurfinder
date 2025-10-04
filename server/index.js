@@ -650,6 +650,7 @@ app.post('/api/export-favorites', async (req, res) => {
       .map(shiur => `
         <item>
           <title><![CDATA[${shiur.title}]]></title>
+          <description><![CDATA[Rabbi: ${shiur.rabbiName || 'Unknown'}]]></description>
           <enclosure url="${shiur.mp3_url}" type="audio/mpeg" />
           <guid>${shiur._id}</guid>
           <pubDate>${pubDate}</pubDate>
