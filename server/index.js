@@ -76,6 +76,16 @@ userSchema.add({
   resetPasswordExpires: Date
 });
 
+// Update the user schema to include notes
+userSchema.add({
+  shiurNotes: [{
+    shiurId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shiur' },
+    note: String,
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+  }]
+});
+
 const User = mongoose.model('User', userSchema);
 const Rabbi = mongoose.model('Rabbi', rabbiSchema);
 const Shiur = mongoose.model('Shiur', shiurSchema);
@@ -343,6 +353,85 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Route to save/update shiur note
+app.put('/api/user/shiur-note', authenticateToken, async (req, res) => {
+  try {
+    const { shiurId, note } = req.body;
+    
+    if (!shiurId) {
+      return res.status(400).json({ message: 'Shiur ID is required' });
+    }
+
+    if (isMongoConnected) {
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Find existing note for this shiur
+      const existingNoteIndex = user.shiurNotes.findIndex(
+        n => n.shiurId.toString() === shiurId
+      );
+
+      if (existingNoteIndex > -1) {
+        // Update existing note
+        if (note && note.trim()) {
+          user.shiurNotes[existingNoteIndex].note = note.trim();
+          user.shiurNotes[existingNoteIndex].updatedAt = new Date();
+        } else {
+          // Remove note if empty
+          user.shiurNotes.splice(existingNoteIndex, 1);
+        }
+      } else {
+        // Add new note
+        if (note && note.trim()) {
+          user.shiurNotes.push({
+            shiurId,
+            note: note.trim()
+          });
+        }
+      }
+
+      await user.save();
+    } else {
+      // Mock mode
+      const user = findMockUser({ _id: req.user.userId });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (!user.shiurNotes) user.shiurNotes = [];
+
+      const existingNoteIndex = user.shiurNotes.findIndex(
+        n => n.shiurId === shiurId
+      );
+
+      if (existingNoteIndex > -1) {
+        if (note && note.trim()) {
+          user.shiurNotes[existingNoteIndex].note = note.trim();
+          user.shiurNotes[existingNoteIndex].updatedAt = new Date();
+        } else {
+          user.shiurNotes.splice(existingNoteIndex, 1);
+        }
+      } else {
+        if (note && note.trim()) {
+          user.shiurNotes.push({
+            shiurId,
+            note: note.trim(),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+      }
+    }
+
+    res.json({ message: 'Note saved successfully' });
+  } catch (error) {
+    console.error('Error saving shiur note:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Shiur routes
 app.get('/api/shiurim', async (req, res) => {
   try {
@@ -421,6 +510,7 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
         .populate('interests')
         .populate('favorites')
         .populate('following')
+        .populate('shiurNotes.shiurId')
         .select('-password');
     } else {
       user = findMockUser({ _id: req.user.userId });

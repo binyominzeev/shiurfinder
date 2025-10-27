@@ -17,23 +17,16 @@ const Favorites = () => {
   useEffect(() => {
     if (userProfile) {
       fetchFullShiurim();
-      // Initialize notes from user profile
+      // Initialize notes from user profile shiurNotes array
       const userNotes = {};
-      userProfile.favorites?.forEach(fav => {
-        if (fav.note) {
-          userNotes[fav._id || fav] = fav.note;
-        }
-      });
-      userProfile.interests?.forEach(int => {
-        if (int.note) {
-          userNotes[int._id || int] = int.note;
-        }
+      userProfile.shiurNotes?.forEach(noteObj => {
+        userNotes[noteObj.shiurId._id || noteObj.shiurId] = noteObj.note;
       });
       setNotes(userNotes);
     }
     // eslint-disable-next-line
   }, [userProfile]);
-
+  
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get('/api/user/profile');
