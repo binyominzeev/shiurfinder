@@ -32,6 +32,9 @@ pids
 coverage/
 *.lcov
 
+torahanytime.csv
+torahanytime.ods
+
 # nyc test coverage
 .nyc_output
 
