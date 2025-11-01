@@ -76,11 +76,18 @@ const Favorites = () => {
         };
       });
     } else {
-      // Remove from favorites (optionally move back to interests)
-      setUserProfile(prev => ({
-        ...prev,
-        favorites: prev?.favorites?.filter(fav => (fav._id || fav) !== shiurId) || []
-      }));
+      // Move from favorites back to interests
+      setUserProfile(prev => {
+        const updatedFavorites = prev?.favorites?.filter(fav => (fav._id || fav) !== shiurId) || [];
+        const shiurToMove = prev?.favorites?.find(fav => (fav._id || fav) === shiurId);
+        const updatedInterests = shiurToMove ? [...(prev?.interests || []), shiurToMove] : prev?.interests || [];
+        
+        return {
+          ...prev,
+          favorites: updatedFavorites,
+          interests: updatedInterests
+        };
+      });
     }
   };
 
