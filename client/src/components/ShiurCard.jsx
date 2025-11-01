@@ -7,10 +7,13 @@ const ShiurCard = ({
   onToggle,
   selectionMode = 'view',
   showRabbi = true,
-  onRabbiFollow // Optional callback to update parent state
+  onRabbiFollow, // Optional callback to update parent state
+  onFavoriteToggle // Optional callback to update parent state when favorite is toggled
 }) => {
   const [addingRabbi, setAddingRabbi] = useState(false);
   const [followed, setFollowed] = useState(false);
+  const [favoriting, setFavoriting] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   const handleExternalClick = (e) => {
     e.stopPropagation();
@@ -29,6 +32,25 @@ const ShiurCard = ({
       // Optionally show error
     } finally {
       setAddingRabbi(false);
+    }
+  };
+
+  const handleFavoriteToggle = async (e) => {
+    e.stopPropagation();
+    setFavoriting(true);
+    try {
+      if (isFavorited) {
+        await axios.delete(`/api/user/favorites/${shiur._id}`);
+        setIsFavorited(false);
+      } else {
+        await axios.post('/api/user/favorites', { shiurId: shiur._id });
+        setIsFavorited(true);
+      }
+      if (onFavoriteToggle) onFavoriteToggle(shiur._id, !isFavorited);
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+    } finally {
+      setFavoriting(false);
     }
   };
 
@@ -139,15 +161,39 @@ const ShiurCard = ({
           )}
         </div>
 
-        <button
-          onClick={handleExternalClick}
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center"
-        >
-          Listen
-          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handleFavoriteToggle}
+            disabled={favoriting}
+            className={`text-sm font-medium flex items-center px-2 py-1 rounded transition ${
+              isFavorited 
+                ? 'text-yellow-600 hover:text-yellow-700 bg-yellow-50' 
+                : 'text-gray-600 hover:text-yellow-600'
+            }`}
+            title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            {favoriting ? (
+              <svg className="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            ) : (
+              <svg className={`w-4 h-4 mr-1 ${isFavorited ? 'fill-current' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            )}
+            {favoriting ? 'Saving...' : isFavorited ? 'Favorited' : 'To Favorites'}
+          </button>
+
+          <button
+            onClick={handleExternalClick}
+            className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center"
+          >
+            Listen
+            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );

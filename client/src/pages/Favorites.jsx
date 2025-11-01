@@ -60,6 +60,20 @@ const Favorites = () => {
     }
   };
 
+  // Handle favorite toggle from ShiurCard
+  const handleFavoriteToggle = (shiurId, isAdded) => {
+    if (isAdded) {
+      // Refresh user profile to get updated favorites
+      fetchUserProfile();
+    } else {
+      // Remove from favorites list
+      setUserProfile(prev => ({
+        ...prev,
+        favorites: prev?.favorites?.filter(fav => (fav._id || fav) !== shiurId) || []
+      }));
+    }
+  };
+
   // Save note for a shiur
   const handleSaveNote = async (shiurId, note) => {
     try {
@@ -254,7 +268,12 @@ const Favorites = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {favorites.map(shiur => (
               <div key={shiur._id} className="relative">
-                <ShiurCard shiur={shiur} selectionMode="view" showRabbi={true} />
+                <ShiurCard 
+                  shiur={shiur} 
+                  selectionMode="view" 
+                  showRabbi={true} 
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
                 <NoteInput shiur={shiur} />
               </div>
             ))}
@@ -286,7 +305,12 @@ const Favorites = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {interests.filter(shiur => !favorites.some(fav => fav._id === shiur._id)).map(shiur => (
               <div key={shiur._id} className="relative">
-                <ShiurCard shiur={shiur} selectionMode="view" showRabbi={true} />
+                <ShiurCard 
+                  shiur={shiur} 
+                  selectionMode="view" 
+                  showRabbi={true} 
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
                 <NoteInput shiur={shiur} />
               </div>
             ))}
