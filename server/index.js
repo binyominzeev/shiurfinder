@@ -435,17 +435,31 @@ app.put('/api/user/shiur-note', authenticateToken, async (req, res) => {
 // Shiur routes
 app.get('/api/shiurim', async (req, res) => {
   try {
+    const { ids } = req.query; // Support fetching specific shiurim by IDs
+    
     let shiurim;
     if (isMongoConnected) {
-      shiurim = await Shiur.find().populate('rabbi').sort({ createdAt: -1 });
+      if (ids) {
+        const idArray = ids.split(',');
+        shiurim = await Shiur.find({ _id: { $in: idArray } }).populate('rabbi');
+      } else {
+        shiurim = await Shiur.find().populate('rabbi').sort({ createdAt: -1 });
+      }
     } else {
-      shiurim = mockShiurim.map(shiur => ({ ...shiur })); // Copy the mock data
+      if (ids) {
+        const idArray = ids.split(',');
+        shiurim = mockShiurim.filter(s => idArray.includes(s._id));
+      } else {
+        shiurim = mockShiurim.map(shiur => ({ ...shiur })); // Copy the mock data
+      }
     }
     
-    // Shuffle the array for discovery
-    const shuffled = shiurim.sort(() => 0.5 - Math.random());
+    // Only shuffle if not fetching specific IDs
+    if (!ids) {
+      shiurim = shiurim.sort(() => 0.5 - Math.random());
+    }
     
-    res.json(shuffled);
+    res.json(shiurim);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -486,7 +500,83 @@ app.post('/api/user/interests', authenticateToken, async (req, res) => {
   }
 });
 
+// Add individual shiur to favorites
 app.post('/api/user/favorites', authenticateToken, async (req, res) => {
+  try {
+    const { shiurId } = req.body;
+    
+    if (!shiurId) {
+      return res.status(400).json({ message: 'shiurId is required' });
+    }
+
+    if (isMongoConnected) {
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Check if already favorited
+      if (!user.favorites.includes(shiurId)) {
+        user.favorites.push(shiurId);
+        await user.save();
+      }
+    } else {
+      const user = findMockUser({ _id: req.user.userId });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (!user.favorites) user.favorites = [];
+      if (!user.favorites.includes(shiurId)) {
+        user.favorites.push(shiurId);
+      }
+    }
+    
+    res.json({ message: 'Shiur added to favorites successfully' });
+  } catch (error) {
+    console.error('Error adding favorite:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Remove individual shiur from favorites
+app.delete('/api/user/favorites/:shiurId', authenticateToken, async (req, res) => {
+  try {
+    const { shiurId } = req.params;
+    
+    if (!shiurId) {
+      return res.status(400).json({ message: 'shiurId is required' });
+    }
+
+    if (isMongoConnected) {
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Remove from favorites
+      user.favorites = user.favorites.filter(fav => fav.toString() !== shiurId);
+      await user.save();
+    } else {
+      const user = findMockUser({ _id: req.user.userId });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (user.favorites) {
+        user.favorites = user.favorites.filter(fav => fav !== shiurId);
+      }
+    }
+    
+    res.json({ message: 'Shiur removed from favorites successfully' });
+  } catch (error) {
+    console.error('Error removing favorite:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update the existing bulk favorites endpoint to keep it for backward compatibility
+app.post('/api/user/favorites/bulk', authenticateToken, async (req, res) => {
   try {
     const { shiurIds } = req.body;
     

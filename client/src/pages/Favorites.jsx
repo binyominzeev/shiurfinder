@@ -61,33 +61,45 @@ const Favorites = () => {
   };
 
   // Handle favorite toggle from ShiurCard
-  const handleFavoriteToggle = (shiurId, isAdded) => {
-    if (isAdded) {
-      // Move from interests to favorites
-      setUserProfile(prev => {
-        const updatedInterests = prev?.interests?.filter(int => (int._id || int) !== shiurId) || [];
-        const shiurToMove = prev?.interests?.find(int => (int._id || int) === shiurId);
-        const updatedFavorites = shiurToMove ? [...(prev?.favorites || []), shiurToMove] : prev?.favorites || [];
+  const handleFavoriteToggle = async (shiurId, isAdded) => {
+    try {
+      if (isAdded) {
+        // Add to favorites in backend
+        await axios.post('/api/user/favorites', { shiurId });
         
-        return {
-          ...prev,
-          favorites: updatedFavorites,
-          interests: updatedInterests
-        };
-      });
-    } else {
-      // Move from favorites back to interests
-      setUserProfile(prev => {
-        const updatedFavorites = prev?.favorites?.filter(fav => (fav._id || fav) !== shiurId) || [];
-        const shiurToMove = prev?.favorites?.find(fav => (fav._id || fav) === shiurId);
-        const updatedInterests = shiurToMove ? [...(prev?.interests || []), shiurToMove] : prev?.interests || [];
+        // Move from interests to favorites locally
+        setUserProfile(prev => {
+          const updatedInterests = prev?.interests?.filter(int => (int._id || int) !== shiurId) || [];
+          const shiurToMove = prev?.interests?.find(int => (int._id || int) === shiurId);
+          const updatedFavorites = shiurToMove ? [...(prev?.favorites || []), shiurToMove] : prev?.favorites || [];
+          
+          return {
+            ...prev,
+            favorites: updatedFavorites,
+            interests: updatedInterests
+          };
+        });
+      } else {
+        // Remove from favorites in backend
+        await axios.delete(`/api/user/favorites/${shiurId}`);
         
-        return {
-          ...prev,
-          favorites: updatedFavorites,
-          interests: updatedInterests
-        };
-      });
+        // Move from favorites back to interests locally
+        setUserProfile(prev => {
+          const updatedFavorites = prev?.favorites?.filter(fav => (fav._id || fav) !== shiurId) || [];
+          const shiurToMove = prev?.favorites?.find(fav => (fav._id || fav) === shiurId);
+          const updatedInterests = shiurToMove ? [...(prev?.interests || []), shiurToMove] : prev?.interests || [];
+          
+          return {
+            ...prev,
+            favorites: updatedFavorites,
+            interests: updatedInterests
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      // Optionally show user feedback about the error
+      alert('Failed to update favorite. Please try again.');
     }
   };
 
