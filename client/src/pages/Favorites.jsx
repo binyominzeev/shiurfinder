@@ -63,10 +63,20 @@ const Favorites = () => {
   // Handle favorite toggle from ShiurCard
   const handleFavoriteToggle = (shiurId, isAdded) => {
     if (isAdded) {
-      // Refresh user profile to get updated favorites
-      fetchUserProfile();
+      // Move from interests to favorites
+      setUserProfile(prev => {
+        const updatedInterests = prev?.interests?.filter(int => (int._id || int) !== shiurId) || [];
+        const shiurToMove = prev?.interests?.find(int => (int._id || int) === shiurId);
+        const updatedFavorites = shiurToMove ? [...(prev?.favorites || []), shiurToMove] : prev?.favorites || [];
+        
+        return {
+          ...prev,
+          favorites: updatedFavorites,
+          interests: updatedInterests
+        };
+      });
     } else {
-      // Remove from favorites list
+      // Remove from favorites (optionally move back to interests)
       setUserProfile(prev => ({
         ...prev,
         favorites: prev?.favorites?.filter(fav => (fav._id || fav) !== shiurId) || []
@@ -273,6 +283,7 @@ const Favorites = () => {
                   selectionMode="view" 
                   showRabbi={true} 
                   onFavoriteToggle={handleFavoriteToggle}
+                  initialIsFavorited={true}
                 />
                 <NoteInput shiur={shiur} />
               </div>
@@ -303,17 +314,21 @@ const Favorites = () => {
             Your Interests ({interests.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {interests.filter(shiur => !favorites.some(fav => fav._id === shiur._id)).map(shiur => (
-              <div key={shiur._id} className="relative">
-                <ShiurCard 
-                  shiur={shiur} 
-                  selectionMode="view" 
-                  showRabbi={true} 
-                  onFavoriteToggle={handleFavoriteToggle}
-                />
-                <NoteInput shiur={shiur} />
-              </div>
-            ))}
+            {interests.filter(shiur => !favorites.some(fav => fav._id === shiur._id)).map(shiur => {
+              const isFavorited = favorites.some(fav => fav._id === shiur._id);
+              return (
+                <div key={shiur._id} className="relative">
+                  <ShiurCard 
+                    shiur={shiur} 
+                    selectionMode="view" 
+                    showRabbi={true} 
+                    onFavoriteToggle={handleFavoriteToggle}
+                    initialIsFavorited={isFavorited}
+                  />
+                  <NoteInput shiur={shiur} />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

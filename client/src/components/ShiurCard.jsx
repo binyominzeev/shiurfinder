@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ShiurCard = ({
@@ -8,12 +8,18 @@ const ShiurCard = ({
   selectionMode = 'view',
   showRabbi = true,
   onRabbiFollow, // Optional callback to update parent state
-  onFavoriteToggle // Optional callback to update parent state when favorite is toggled
+  onFavoriteToggle, // Optional callback to update parent state when favorite is toggled
+  initialIsFavorited = false // Pass the initial favorite state from parent
 }) => {
   const [addingRabbi, setAddingRabbi] = useState(false);
   const [followed, setFollowed] = useState(false);
   const [favoriting, setFavoriting] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setIsFavorited(initialIsFavorited);
+  }, [initialIsFavorited]);
 
   const handleExternalClick = (e) => {
     e.stopPropagation();
@@ -42,11 +48,12 @@ const ShiurCard = ({
       if (isFavorited) {
         await axios.delete(`/api/user/favorites/${shiur._id}`);
         setIsFavorited(false);
+        if (onFavoriteToggle) onFavoriteToggle(shiur._id, false);
       } else {
         await axios.post('/api/user/favorites', { shiurId: shiur._id });
         setIsFavorited(true);
+        if (onFavoriteToggle) onFavoriteToggle(shiur._id, true);
       }
-      if (onFavoriteToggle) onFavoriteToggle(shiur._id, !isFavorited);
     } catch (err) {
       console.error('Error toggling favorite:', err);
     } finally {
