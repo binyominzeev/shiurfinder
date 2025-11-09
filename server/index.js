@@ -575,6 +575,33 @@ app.delete('/api/user/favorites/:shiurId', authenticateToken, async (req, res) =
   }
 });
 
+app.get('/api/user/favorites-by-parasha', authenticateToken, async (req, res) => {
+  try {
+    const { parasha } = req.query;
+    if (!parasha) return res.status(400).json({ message: 'Parasha is required' });
+
+    let user;
+    if (isMongoConnected) {
+      user = await User.findById(req.user.userId).select('favorites');
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      // Find all favorites for this parasha
+      const shiurim = await Shiur.find({ _id: { $in: user.favorites }, parasha });
+      return res.json(shiurim);
+    } else {
+      // Mock mode
+      user = findMockUser({ _id: req.user.userId });
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      const shiurim = mockShiurim.filter(
+        s => user.favorites.includes(s._id) && s.parasha === parasha
+      );
+      return res.json(shiurim);
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Update the existing bulk favorites endpoint to keep it for backward compatibility
 app.post('/api/user/favorites/bulk', authenticateToken, async (req, res) => {
   try {

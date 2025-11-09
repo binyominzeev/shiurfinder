@@ -110,6 +110,31 @@ const Discovery = () => {
     return [];
   };
 
+  useEffect(() => {
+    // Only fetch if on step 2 (favorites selection)
+    if (currentStep === 2 && selectedParasha && selectedParasha !== 'All') {
+      const fetchFavoritesForParasha = async () => {
+        try {
+          const res = await axios.get('/api/user/favorites-by-parasha', {
+            params: { parasha: selectedParasha }
+          });
+          // res.data is an array of shiur objects
+          const favoriteIds = res.data.map(s => s._id);
+          setSelectedFavorites(favoriteIds);
+        } catch (err) {
+          console.error('Error fetching favorites for parasha:', err);
+          setSelectedFavorites([]); // fallback: clear if error
+        }
+      };
+      fetchFavoritesForParasha();
+    }
+    // If "All" is selected or not on step 2, clear favorites
+    if (currentStep === 2 && (selectedParasha === 'All' || !selectedParasha)) {
+      setSelectedFavorites([]);
+    }
+    // eslint-disable-next-line
+  }, [selectedParasha, currentStep]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-64">
