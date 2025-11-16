@@ -1,0 +1,14 @@
+https://www.torahanytime.com/topics/50?selectedFilters=%7B%22speakerIds%22%3A%5B882%2C888%5D%7D&pageNumber=1
+
+105	Glatstein
+256 Orlofsky
+570 Twerski
+898 Mizrahi
+1050 Neuberger
+1468 Gross
+
+105%2C256%2C570%2C898%2C1050%2C1468
+
+https://www.torahanytime.com/topics/50?selectedFilters=%7B%22speakerIds%22%3A%5B105%2C256%2C570%2C898%2C1050%2C1468%5D%7D&pageNumber=1
+
+

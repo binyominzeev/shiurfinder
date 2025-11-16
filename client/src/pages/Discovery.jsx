@@ -52,23 +52,31 @@ const Discovery = () => {
 
   const handleInterestToggle = (shiurId) => {
     setSelectedInterests(prev => {
+      let updated;
       if (prev.includes(shiurId)) {
-        return prev.filter(id => id !== shiurId);
+        updated = prev.filter(id => id !== shiurId);
       } else if (prev.length < 30) {
-        return [...prev, shiurId];
+        updated = [...prev, shiurId];
+      } else {
+        updated = prev;
       }
-      return prev;
+      console.log('[Interest Toggle]', { shiurId, updatedInterests: updated });
+      return updated;
     });
   };
 
   const handleFavoriteToggle = (shiurId) => {
     setSelectedFavorites(prev => {
+      let updated;
       if (prev.includes(shiurId)) {
-        return prev.filter(id => id !== shiurId);
+        updated = prev.filter(id => id !== shiurId);
       } else if (prev.length < 10) {
-        return [...prev, shiurId];
+        updated = [...prev, shiurId];
+      } else {
+        updated = prev;
       }
-      return prev;
+      console.log('[Favorite Toggle]', { shiurId, updatedFavorites: updated });
+      return updated;
     });
   };
 
@@ -86,7 +94,9 @@ const Discovery = () => {
   const savePreferences = async () => {
     setSaving(true);
     try {
+      console.log('[Saving Interests]', selectedInterests);
       await axios.post('/api/user/interests', { shiurIds: selectedInterests });
+      console.log('[Saving Favorites]', selectedFavorites);
       await axios.post('/api/user/favorites', { shiurIds: selectedFavorites });
       setCurrentStep(3);
       setTimeout(() => navigate('/'), 2000);
@@ -109,31 +119,6 @@ const Discovery = () => {
     }
     return [];
   };
-
-  useEffect(() => {
-    // Only fetch if on step 2 (favorites selection)
-    if (currentStep === 2 && selectedParasha && selectedParasha !== 'All') {
-      const fetchFavoritesForParasha = async () => {
-        try {
-          const res = await axios.get('/api/user/favorites-by-parasha', {
-            params: { parasha: selectedParasha }
-          });
-          // res.data is an array of shiur objects
-          const favoriteIds = res.data.map(s => s._id);
-          setSelectedFavorites(favoriteIds);
-        } catch (err) {
-          console.error('Error fetching favorites for parasha:', err);
-          setSelectedFavorites([]); // fallback: clear if error
-        }
-      };
-      fetchFavoritesForParasha();
-    }
-    // If "All" is selected or not on step 2, clear favorites
-    if (currentStep === 2 && (selectedParasha === 'All' || !selectedParasha)) {
-      setSelectedFavorites([]);
-    }
-    // eslint-disable-next-line
-  }, [selectedParasha, currentStep]);
 
   if (loading) {
     return (
