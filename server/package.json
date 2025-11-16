@@ -1,26 +1,29 @@
 {
-  "name": "shiurfinder-server",
+  "name": "myshiurim",
   "version": "1.0.0",
-  "description": "Backend server for ShiurFinder",
-  "main": "index.js",
+  "description": "A web application for managing and sharing shiurim.",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "axios": "^1.12.2",
+    "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "csv-parser": "^3.0.0",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "csv-parse": "^4.16.3",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
     "ftp": "^0.3.10",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.3",
-    "multer": "^2.0.2",
-    "nodemailer": "^7.0.6"
+    "mongoose": "^5.10.9",
+    "multer": "^1.4.2",
+    "nodemailer": "^6.4.11",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
-  }
+    "nodemon": "^2.0.7"
+  },
+  "author": "Your Name",
+  "license": "ISC"
 }
