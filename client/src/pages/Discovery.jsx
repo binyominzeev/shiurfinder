@@ -97,7 +97,7 @@ const Discovery = () => {
       console.log('[Saving Interests]', selectedInterests);
       await axios.post('/api/user/interests', { shiurIds: selectedInterests });
       console.log('[Saving Favorites]', selectedFavorites);
-      await axios.post('/api/user/favorites', { shiurIds: selectedFavorites });
+      await axios.post('/api/user/favorites/bulk', { shiurIds: selectedFavorites }); // <-- FIXED
       setCurrentStep(3);
       setTimeout(() => navigate('/'), 2000);
     } catch (error) {
