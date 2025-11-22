@@ -16,6 +16,11 @@ shiurfinder.*.json
 .env.test.local
 .env.production.local
 
+all-titles.txt
+torahanytime.csv
+torahanytime.ods
+yutorah.csv
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
