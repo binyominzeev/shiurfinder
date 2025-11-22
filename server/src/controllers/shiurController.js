@@ -66,9 +66,24 @@ const deleteShiur = async (req, res) => {
   }
 };
 
+// Get a single shiur by ID
+const getShiurById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const shiur = await Shiur.findById(id).populate('rabbi');
+    if (!shiur) {
+      return res.status(404).json({ message: 'Shiur not found' });
+    }
+    res.json(shiur);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Export the controller functions
 module.exports = {
   getShiurim,
+  getShiurById,
   createShiur,
   updateShiur,
   deleteShiur,
