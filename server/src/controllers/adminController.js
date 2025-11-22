@@ -6,7 +6,6 @@ const fs = require('fs');
 const User = require('../models/User');
 const Rabbi = require('../models/Rabbi');
 const Shiur = require('../models/Shiur');
-const upload = multer({ dest: 'uploads/' });
 
 const uploadShiurim = async (req, res) => {
   try {
