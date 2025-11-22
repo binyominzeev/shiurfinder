@@ -3,7 +3,9 @@
 const multer = require('multer');
 const csv = require('csv-parse');
 const fs = require('fs');
-const { User, Rabbi, Shiur } = require('../models');
+const User = require('../models/User');
+const Rabbi = require('../models/Rabbi');
+const Shiur = require('../models/Shiur');
 const upload = multer({ dest: 'uploads/' });
 
 const uploadShiurim = async (req, res) => {
