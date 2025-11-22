@@ -1,9 +1,9 @@
-import express from 'express';
-import { getUserRssFeed } from '../controllers/rssController';
-import { authenticateToken } from '../middleware/auth';
+const express = require('express');
+const { getUserRssFeed } = require('../controllers/rssController');
+const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.get('/:username', authenticateToken, getUserRssFeed);
 
-export default router;
+module.exports = router;

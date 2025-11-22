@@ -1,6 +1,7 @@
 // filepath: /server/src/controllers/rssController.js
 const express = require('express');
-const { User, Shiur } = require('../models');
+const User = require('../models/User');
+const Shiur = require('../models/Shiur');
 const { formatRSSFeed } = require('../utils/rssUtils');
 
 const router = express.Router();
